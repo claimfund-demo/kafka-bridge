@@ -11,10 +11,9 @@ import org.influxdb.impl.InfluxDBImpl;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Main {
+public class InfluxDbMain {
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 9092;
-    private static final String[] TOPICS = {"aberdeen", "fife", "inverclyde"};
 
     public static void main(String[] args) throws Exception {
         final String URL = "kafka:aberdeen,fife,inverclyde?brokers=" + HOST + ":" + PORT + "&autoOffsetReset=earliest&consumersCount=1";
