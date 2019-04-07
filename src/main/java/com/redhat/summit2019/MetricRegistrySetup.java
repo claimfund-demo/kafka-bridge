@@ -21,10 +21,6 @@ public class MetricRegistrySetup {
         Metadata counterMetadata = new Metadata(CustomMetrics.CONSUMED_MESSAGES, MetricType.COUNTER);
         counterMetadata.setDescription("Displays the number of consumed messages from Kafka");
 
-//        Metadata budgetMetadata = new Metadata(CustomMetrics.TOTAL_BUDGET, MetricType.GAUGE);
-//        budgetMetadata.setDescription("Displays the available budget");
-
         metricRegistry.register(counterMetadata, new CounterImpl());
-//        metricRegistry.register(budgetMetadata, new MeterImpl());
     }
 }

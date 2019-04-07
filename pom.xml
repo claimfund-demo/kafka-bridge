@@ -6,11 +6,10 @@
   <artifactId>kafka-bridge</artifactId>
   <version>1.0-SNAPSHOT</version>
   <properties>
-    <maven.compiler.target>11</maven.compiler.target>
     <quarkus.version>0.12.0</quarkus.version>
+    <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
     <surefire.version>3.0.0-M3</surefire.version>
-    <camel.version>2.23.1</camel.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -24,21 +23,6 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-kafka</artifactId>
-      <version>${camel.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-influxdb</artifactId>
-      <version>${camel.version}</version>
-    </dependency>
-<!--    <dependency>-->
-<!--      <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--      <artifactId>jackson-databind</artifactId>-->
-<!--      <version>2.9.8</version>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>

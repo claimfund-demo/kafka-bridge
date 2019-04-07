@@ -24,10 +24,10 @@ public class StatisticResource {
 
     private List<Statistic> messages = new ArrayList<>();
     private AtomicInteger counter = new AtomicInteger(0);
-    private AtomicLong budget = new AtomicLong(100_000_000);
+    private AtomicLong budget = new AtomicLong(0);
 
     @Inject
-    @RegistryType(type= MetricRegistry.Type.APPLICATION)
+    @RegistryType(type = MetricRegistry.Type.APPLICATION)
     MetricRegistry registry;
 
     @GET
@@ -38,12 +38,9 @@ public class StatisticResource {
         return Response.ok(JsonbBuilder.create().toJson(messages)).build();
     }
 
-    @Gauge(unit = "MM", name="total_budget")
+    @Gauge(unit = "MM", name = "total_budget")
     public long getBudget() {
-        long spent = budget.get() - counter.get() * 1000;
-        budget.set(spent);
-        System.out.println("Querying budget... " + spent);
-        return budget.get();
+        return this.budget.get();
     }
 
     @Incoming("fromKafka")
@@ -56,5 +53,10 @@ public class StatisticResource {
         messages.add(statistic);
         Counter counterMetric = registry.getCounters().get(CustomMetrics.CONSUMED_MESSAGES);
         counterMetric.inc();
+    }
+
+    @Incoming("budget-update")
+    public void getBudgetUpdate(long budget) {
+        this.budget.set(budget);
     }
 }
