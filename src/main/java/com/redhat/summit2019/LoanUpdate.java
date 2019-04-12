@@ -3,12 +3,14 @@ package com.redhat.summit2019;
 import java.util.Objects;
 
 public class LoanUpdate {
+    private int applicationID;
     private String farmCity;
     private String farmCouncil;
     private String loanStatus;
     private long loanAmount;
 
-    public LoanUpdate(String farmCity, String farmCouncil, String loanStatus, long loanAmount) {
+    public LoanUpdate(int applicationID, String farmCity, String farmCouncil, String loanStatus, long loanAmount) {
+        this.applicationID = applicationID;
         this.farmCity = farmCity;
         this.farmCouncil = farmCouncil;
         this.loanStatus = loanStatus;
@@ -16,6 +18,14 @@ public class LoanUpdate {
     }
 
     public LoanUpdate() {
+    }
+
+    public long getApplicationID() {
+        return applicationID;
+    }
+
+    public void setApplicationID(int applicationID) {
+        this.applicationID = applicationID;
     }
 
     public String getFarmCity() {
@@ -55,7 +65,8 @@ public class LoanUpdate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LoanUpdate that = (LoanUpdate) o;
-        return getLoanAmount() == that.getLoanAmount() &&
+        return getApplicationID() == that.getApplicationID() &&
+                getLoanAmount() == that.getLoanAmount() &&
                 getFarmCity().equals(that.getFarmCity()) &&
                 getFarmCouncil().equals(that.getFarmCouncil()) &&
                 getLoanStatus().equals(that.getLoanStatus());
@@ -63,13 +74,14 @@ public class LoanUpdate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFarmCity(), getFarmCouncil(), getLoanStatus(), getLoanAmount());
+        return Objects.hash(getApplicationID(), getFarmCity(), getFarmCouncil(), getLoanStatus(), getLoanAmount());
     }
 
     @Override
     public String toString() {
         return "LoanUpdate{" +
-                "farmCity='" + farmCity + '\'' +
+                "applicationID=" + applicationID +
+                ", farmCity='" + farmCity + '\'' +
                 ", farmCouncil='" + farmCouncil + '\'' +
                 ", loanStatus='" + loanStatus + '\'' +
                 ", loanAmount=" + loanAmount +

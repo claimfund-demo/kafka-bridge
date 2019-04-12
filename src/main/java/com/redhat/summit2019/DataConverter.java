@@ -13,12 +13,24 @@ public class DataConverter implements TypeConverters {
     @Converter
     public Point toPoint(LoanUpdate loan) {
         Point point = Point.measurement("loan")
+                .addField("applicationID", loan.getApplicationID())
                 .addField("loanStatus", loan.getLoanStatus())
                 .tag("farmCity", loan.getFarmCity())
                 .tag("farmCouncil", loan.getFarmCouncil())
                 .build();
 
         LOG.debug("Converting loan update " + loan + " to InfluxDB point " + point.lineProtocol());
+
+        return point;
+    }
+
+    @Converter
+    public Point toPoint(Integer budget) {
+        Point point = Point.measurement("budget")
+                .addField("budget", budget)
+                .build();
+
+        LOG.debug("Converting budget update " + budget + " to InfluxDB point " + point.lineProtocol());
 
         return point;
     }
