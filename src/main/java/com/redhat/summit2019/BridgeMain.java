@@ -101,6 +101,9 @@ public class BridgeMain extends MainListenerSupport {
                 var dbMapper = new InfluxDBResultMapper();
                 var result = db.query(query);
                 var rows = dbMapper.toPOJO(result, LoanDTO.class);
+                if (rows == null) {
+                    return;
+                }
                 for (LoanDTO loan : rows) {
                     if ("Pending".equalsIgnoreCase(loan.getLoanStatus()) && loan.getApplicationID() == loanUpdate.getApplicationID()) {
                         var instantInNano = ChronoUnit.NANOS.between(Instant.EPOCH, loan.getTime());
