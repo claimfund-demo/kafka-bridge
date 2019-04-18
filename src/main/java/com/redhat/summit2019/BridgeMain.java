@@ -23,10 +23,14 @@ import java.util.concurrent.TimeUnit;
 
 public class BridgeMain extends MainListenerSupport {
 
-    private static final String KAFKA_HOST = "127.0.0.1";
-    private static final int KAFKA_PORT = 9092;
-    private static final String INFLUXDB_HOST = "127.0.0.1";
-    private static final int INFLUXDB_PORT = 8086;
+    private static final String KAFKA_HOST = System.getProperty("KAFKA_HOST", "127.0.0.1");
+    private static final int KAFKA_PORT = Integer.parseInt(System.getProperty("KAFKA_PORT", "9092"));
+    private static final String INFLUXDB_HOST = System.getProperty("INFLUXDB_HOST", "127.0.0.1");
+    private static final int INFLUXDB_PORT = Integer.parseInt(System.getProperty("INFLUXDB_PORT", "8086"));
+    private static final String LOAN_TOPIC = System.getProperty("LOAN_TOPIC", "claimfund");
+    private static final String BUDGET_TOPIC = System.getProperty("BUDGET_TOPIC", "budget");
+    private static final String LOAN_UPDATES_DB = System.getProperty("LOAN_UPDATES_DB", "loan_updates");
+    private static final String BUDGET_UPDATES_DB = System.getProperty("BUDGET_UPDATES_DB", "budget_updates");
 
     private static ObjectMapper jsonMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -43,26 +47,26 @@ public class BridgeMain extends MainListenerSupport {
         var loanUpdateRoute = new RouteBuilder() {
             @Override
             public void configure() {
-                final String URL = "kafka:loan?brokers=" + KAFKA_HOST + ":" + KAFKA_PORT + "&consumersCount=1";
+                final String URL = "kafka:"+ LOAN_TOPIC + "?brokers=" + KAFKA_HOST + ":" + KAFKA_PORT + "&consumersCount=1";
                 from(URL).process(exchange -> {
                     if (exchange.getIn() != null) {
                         var message = exchange.getIn();
-                        LOG.info("Consuming message from Kafka's loan topic == " + message.getBody(String.class));
+                        LOG.debug("Consuming message from Kafka's loan topic == " + message.getBody(String.class));
                         var loanUpdate = jsonMapper.readValue(message.getBody(String.class), LoanUpdate.class);
-                        LOG.info("Message " + message.getBody(String.class) + " converted to " + loanUpdate.toString());
+                        LOG.debug("Message " + message.getBody(String.class) + " converted to " + loanUpdate.toString());
 
                         checkForPendingEntry(loanUpdate);
 
                         exchange.getOut().setBody(loanUpdate);
                     }
-                }).to("influxdb:influxConnectionBean?databaseName=loan_updates");
+                }).to("influxdb:influxConnectionBean?databaseName=" + LOAN_UPDATES_DB);
             }
         };
 
         var budgetUpdate = new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                final String URL = "kafka:budget?brokers=" + KAFKA_HOST + ":" + KAFKA_PORT + "&consumersCount=1";
+                final String URL = "kafka:" + BUDGET_TOPIC + "?brokers=" + KAFKA_HOST + ":" + KAFKA_PORT + "&consumersCount=1";
                 from(URL).process(exchange -> {
                     if (exchange.getIn() != null) {
                         var message = exchange.getIn();
@@ -71,7 +75,7 @@ public class BridgeMain extends MainListenerSupport {
                         LOG.debug("Message " + message.getBody(String.class) + " converted to " + budgetUpdate);
                         exchange.getOut().setBody(budgetUpdate.get("budget"));
                     }
-                }).to("influxdb:influxConnectionBean?databaseName=budget_updates");
+                }).to("influxdb:influxConnectionBean?databaseName=" + BUDGET_UPDATES_DB);
             }
         };
 
@@ -95,7 +99,7 @@ public class BridgeMain extends MainListenerSupport {
     private void checkForPendingEntry(LoanUpdate loanUpdate) {
         if (!"pending".equalsIgnoreCase(loanUpdate.getLoanStatus())) {
             try (var db = getInfluxDbBean()) {
-                LOG.info("Loan " + loanUpdate.toString() + " has been " + loanUpdate.getLoanStatus()
+                LOG.debug("Loan " + loanUpdate.toString() + " has been " + loanUpdate.getLoanStatus()
                         + ". Replacing data in InfluxDB");
                 var query = new Query("SELECT * from loan WHERE applicationID = " + loanUpdate.getApplicationID(), "loan_updates");
                 var dbMapper = new InfluxDBResultMapper();
@@ -114,7 +118,7 @@ public class BridgeMain extends MainListenerSupport {
                                 .tag("farmCouncil", loan.getFarmCouncil())
                                 .tag("farmCity", loan.getFarmCity())
                                 .build();
-                        LOG.info("Invalidating pending application " + loan.getApplicationID() + " with " + point.lineProtocol());
+                        LOG.debug("Invalidating pending application " + loan.getApplicationID() + " with " + point.lineProtocol());
                         db.setDatabase("loan_updates");
                         db.setRetentionPolicy("default");
                         db.write(point);
