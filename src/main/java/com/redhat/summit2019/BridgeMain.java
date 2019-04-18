@@ -23,14 +23,14 @@ import java.util.concurrent.TimeUnit;
 
 public class BridgeMain extends MainListenerSupport {
 
-    private static final String KAFKA_HOST = System.getProperty("KAFKA_HOST", "127.0.0.1");
-    private static final int KAFKA_PORT = Integer.parseInt(System.getProperty("KAFKA_PORT", "9092"));
-    private static final String INFLUXDB_HOST = System.getProperty("INFLUXDB_HOST", "127.0.0.1");
-    private static final int INFLUXDB_PORT = Integer.parseInt(System.getProperty("INFLUXDB_PORT", "8086"));
-    private static final String LOAN_TOPIC = System.getProperty("LOAN_TOPIC", "claimfund");
-    private static final String BUDGET_TOPIC = System.getProperty("BUDGET_TOPIC", "budget");
-    private static final String LOAN_UPDATES_DB = System.getProperty("LOAN_UPDATES_DB", "loan_updates");
-    private static final String BUDGET_UPDATES_DB = System.getProperty("BUDGET_UPDATES_DB", "budget_updates");
+    private static final String KAFKA_HOST = System.getenv().getOrDefault("KAFKA_HOST", "127.0.0.1");
+    private static final int KAFKA_PORT = Integer.parseInt(System.getenv().getOrDefault("KAFKA_PORT", "9092"));
+    private static final String INFLUXDB_HOST = System.getenv().getOrDefault("INFLUXDB_HOST", "127.0.0.1");
+    private static final int INFLUXDB_PORT = Integer.parseInt(System.getenv().getOrDefault("INFLUXDB_PORT", "8086"));
+    private static final String LOAN_TOPIC = System.getenv().getOrDefault("LOAN_TOPIC", "claimfund");
+    private static final String BUDGET_TOPIC = System.getenv().getOrDefault("BUDGET_TOPIC", "budget");
+    private static final String LOAN_UPDATES_DB = System.getenv().getOrDefault("LOAN_UPDATES_DB", "loan_updates");
+    private static final String BUDGET_UPDATES_DB = System.getenv().getOrDefault("BUDGET_UPDATES_DB", "budget_updates");
 
     private static ObjectMapper jsonMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -85,7 +85,6 @@ public class BridgeMain extends MainListenerSupport {
 
         main.addRouteBuilder(loanUpdateRoute);
         main.addRouteBuilder(budgetUpdate);
-        main.enableHangupSupport();
 
         LOG.info("Starting up the Kafka bridge...");
         try {
