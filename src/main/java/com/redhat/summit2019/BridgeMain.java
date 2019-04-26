@@ -119,7 +119,7 @@ public class BridgeMain extends MainListenerSupport {
                                 .build();
                         LOG.debug("Invalidating pending application " + loan.getApplicationID() + " with " + point.lineProtocol());
                         db.setDatabase("loan_updates");
-                        db.setRetentionPolicy("default");
+                        db.setRetentionPolicy("autogen");
                         db.write(point);
                     }
                 }
