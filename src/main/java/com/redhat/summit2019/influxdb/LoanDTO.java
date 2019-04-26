@@ -22,8 +22,21 @@ public class LoanDTO {
 
     @Column(name = "loanStatus")
     private String loanStatus;
+    
+    @Column(name = "loanAmount")
+    private long loanAmount;
+    
+    
 
-    public Instant getTime() {
+    public long getLoanAmount() {
+		return loanAmount;
+	}
+
+	public void setLoanAmount(long loanAmount) {
+		this.loanAmount = loanAmount;
+	}
+
+	public Instant getTime() {
         return time;
     }
 

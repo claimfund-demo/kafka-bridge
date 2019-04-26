@@ -114,6 +114,7 @@ public class BridgeMain extends MainListenerSupport {
                                 .time(instantInNano, TimeUnit.NANOSECONDS)
                                 .addField("applicationID", loan.getApplicationID())
                                 .addField("loanStatus", "updated")
+                                .addField("loanAmount", loan.getLoanAmount())
                                 .tag("farmCouncil", loan.getFarmCouncil())
                                 .tag("farmCity", loan.getFarmCity())
                                 .build();
