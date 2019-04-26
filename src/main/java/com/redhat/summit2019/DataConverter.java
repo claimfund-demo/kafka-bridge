@@ -15,8 +15,10 @@ public class DataConverter implements TypeConverters {
         Point point = Point.measurement("loan")
                 .addField("applicationID", loan.getApplicationID())
                 .addField("loanStatus", loan.getLoanStatus())
+                .addField("loanAmount", loan.getLoanAmount())
                 .tag("farmCity", loan.getFarmCity())
                 .tag("farmCouncil", loan.getFarmCouncil())
+                
                 .build();
 
         LOG.debug("Converting loan update " + loan + " to InfluxDB point " + point.lineProtocol());
