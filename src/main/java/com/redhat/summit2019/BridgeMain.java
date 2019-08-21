@@ -31,6 +31,8 @@ public class BridgeMain extends MainListenerSupport {
     private static final String BUDGET_TOPIC = System.getenv().getOrDefault("BUDGET_TOPIC", "budget");
     private static final String LOAN_UPDATES_DB = System.getenv().getOrDefault("LOAN_UPDATES_DB", "loan_updates");
     private static final String BUDGET_UPDATES_DB = System.getenv().getOrDefault("BUDGET_UPDATES_DB", "budget_updates");
+    private static final String LOAN_RETENTION_POLICY = System.getenv().getOrDefault("LOAN_RETENTION_POLICY", "autogen");
+    private static final String BUDGET_RETENTION_POLICY = System.getenv().getOrDefault("BUDGET_RETENTION_POLICY", "autogen");
 
     private static ObjectMapper jsonMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -38,7 +40,7 @@ public class BridgeMain extends MainListenerSupport {
     private static Logger LOG = LoggerFactory.getLogger(DataConverter.class);
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         BridgeMain main = new BridgeMain();
         main.start();
     }
@@ -59,13 +61,13 @@ public class BridgeMain extends MainListenerSupport {
 
                         exchange.getOut().setBody(loanUpdate);
                     }
-                }).to("influxdb:influxConnectionBean?databaseName=" + LOAN_UPDATES_DB);
+                }).to("influxdb:influxConnectionBean?databaseName=" + LOAN_UPDATES_DB + "&retentionPolicy=" + LOAN_RETENTION_POLICY);
             }
         };
 
         var budgetUpdate = new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 final String URL = "kafka:" + BUDGET_TOPIC + "?brokers=" + KAFKA_HOST + ":" + KAFKA_PORT + "&consumersCount=1";
                 from(URL).process(exchange -> {
                     if (exchange.getIn() != null) {
@@ -75,7 +77,7 @@ public class BridgeMain extends MainListenerSupport {
                         LOG.debug("Message " + message.getBody(String.class) + " converted to " + budgetUpdate);
                         exchange.getOut().setBody(budgetUpdate.get("budget"));
                     }
-                }).to("influxdb:influxConnectionBean?databaseName=" + BUDGET_UPDATES_DB);
+                }).to("influxdb:influxConnectionBean?databaseName=" + BUDGET_UPDATES_DB + "&retentionPolicy=" + BUDGET_RETENTION_POLICY);
             }
         };
 
@@ -100,7 +102,7 @@ public class BridgeMain extends MainListenerSupport {
             try (var db = getInfluxDbBean()) {
                 LOG.debug("Loan " + loanUpdate.toString() + " has been " + loanUpdate.getLoanStatus()
                         + ". Replacing data in InfluxDB");
-                var query = new Query("SELECT * from loan WHERE applicationID = " + loanUpdate.getApplicationID(), "loan_updates");
+                var query = new Query("SELECT * from loan WHERE applicationID = " + loanUpdate.getApplicationID(), LOAN_UPDATES_DB);
                 var dbMapper = new InfluxDBResultMapper();
                 var result = db.query(query);
                 var rows = dbMapper.toPOJO(result, LoanDTO.class);
@@ -119,8 +121,8 @@ public class BridgeMain extends MainListenerSupport {
                                 .tag("farmCity", loan.getFarmCity())
                                 .build();
                         LOG.debug("Invalidating pending application " + loan.getApplicationID() + " with " + point.lineProtocol());
-                        db.setDatabase("loan_updates");
-                        db.setRetentionPolicy("autogen");
+                        db.setDatabase(LOAN_UPDATES_DB);
+                        db.setRetentionPolicy(LOAN_RETENTION_POLICY);
                         db.write(point);
                     }
                 }

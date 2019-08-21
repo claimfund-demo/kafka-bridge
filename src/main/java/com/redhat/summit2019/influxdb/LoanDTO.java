@@ -22,11 +22,9 @@ public class LoanDTO {
 
     @Column(name = "loanStatus")
     private String loanStatus;
-    
+
     @Column(name = "loanAmount")
     private long loanAmount;
-    
-    
 
     public long getLoanAmount() {
 		return loanAmount;

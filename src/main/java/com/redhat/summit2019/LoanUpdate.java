@@ -66,9 +66,9 @@ public class LoanUpdate {
         if (o == null || getClass() != o.getClass()) return false;
         LoanUpdate that = (LoanUpdate) o;
         return getApplicationID() == that.getApplicationID() &&
-                getLoanAmount() == that.getLoanAmount() &&
                 getFarmCity().equals(that.getFarmCity()) &&
                 getFarmCouncil().equals(that.getFarmCouncil()) &&
+                getLoanAmount() == that.getLoanAmount() &&
                 getLoanStatus().equals(that.getLoanStatus());
     }
 
