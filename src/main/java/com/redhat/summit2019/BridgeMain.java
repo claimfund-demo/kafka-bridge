@@ -37,7 +37,7 @@ public class BridgeMain extends MainListenerSupport {
     private static ObjectMapper jsonMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    private static Logger LOG = LoggerFactory.getLogger(DataConverter.class);
+    private static Logger LOG = LoggerFactory.getLogger(BridgeMain.class);
 
 
     public static void main(String[] args) {
@@ -100,7 +100,7 @@ public class BridgeMain extends MainListenerSupport {
     private void checkForPendingEntry(LoanUpdate loanUpdate) {
         if (!"pending".equalsIgnoreCase(loanUpdate.getLoanStatus())) {
             try (var db = getInfluxDbBean()) {
-                LOG.debug("Loan " + loanUpdate.toString() + " has been " + loanUpdate.getLoanStatus()
+                LOG.info("Loan " + loanUpdate.toString() + " has been " + loanUpdate.getLoanStatus()
                         + ". Replacing data in InfluxDB");
                 var query = new Query("SELECT * from loan WHERE applicationID = " + loanUpdate.getApplicationID(), LOAN_UPDATES_DB);
                 var dbMapper = new InfluxDBResultMapper();
@@ -120,7 +120,7 @@ public class BridgeMain extends MainListenerSupport {
                                 .tag("farmCouncil", loan.getFarmCouncil())
                                 .tag("farmCity", loan.getFarmCity())
                                 .build();
-                        LOG.debug("Invalidating pending application " + loan.getApplicationID() + " with " + point.lineProtocol());
+                        LOG.info("Invalidating pending application " + loan.getApplicationID() + " with " + point.lineProtocol());
                         db.setDatabase(LOAN_UPDATES_DB);
                         db.setRetentionPolicy(LOAN_RETENTION_POLICY);
                         db.write(point);
