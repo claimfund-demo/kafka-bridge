@@ -102,7 +102,7 @@ public class BridgeMain extends MainListenerSupport {
             try (var db = getInfluxDbBean()) {
                 LOG.info("Loan " + loanUpdate.toString() + " has been " + loanUpdate.getLoanStatus()
                         + ". Replacing data in InfluxDB");
-                var query = new Query("SELECT * from loan WHERE applicationID = " + loanUpdate.getApplicationID(), LOAN_UPDATES_DB);
+                var query = new Query("SELECT * from \"" + LOAN_RETENTION_POLICY  + "\".loan WHERE applicationID = " + loanUpdate.getApplicationID(), LOAN_UPDATES_DB);
                 var dbMapper = new InfluxDBResultMapper();
                 var result = db.query(query);
                 var rows = dbMapper.toPOJO(result, LoanDTO.class);
